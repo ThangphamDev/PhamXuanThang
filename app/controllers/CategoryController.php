@@ -22,7 +22,7 @@ class CategoryController extends Controller {
     // Hiển thị danh sách danh mục (action: index)
     public function index() {
         $categories = $this->categoryModel->getCategories();
-        include 'app/views/Category/list.php';
+        include 'app/views/category/list.php';
     }
 
     // Thêm danh mục mới (action: add)

@@ -1,5 +1,6 @@
 <?php include 'app/views/shares/header.php'; ?>
 <link rel="stylesheet" href="/public/css/show.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <div class="container">
     <!-- Breadcrumb -->
@@ -373,46 +374,48 @@
     
     <!-- Sản phẩm liên quan -->
     <div class="related-products">
-        <h2 class="section-title">Sản phẩm liên quan</h2>
-        <div class="products-grid">
-            <?php if (!empty($related_products)): ?>
-                <?php foreach ($related_products as $related): ?>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <a href="/Product/show/<?php echo $related->id; ?>">
-                                <img src="/<?php echo htmlspecialchars($related->image); ?>" 
-                                     alt="<?php echo htmlspecialchars($related->name); ?>">
-                            </a>
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name">
+        <div class="container">
+            <h2 class="section-title">Sản phẩm liên quan</h2>
+            <div class="products-grid">
+                <?php if (!empty($related_products)): ?>
+                    <?php foreach ($related_products as $related): ?>
+                        <div class="product-card">
+                            <div class="product-image">
                                 <a href="/Product/show/<?php echo $related->id; ?>">
-                                    <?php echo htmlspecialchars($related->name); ?>
+                                    <img src="/<?php echo htmlspecialchars($related->image); ?>" 
+                                         alt="<?php echo htmlspecialchars($related->name); ?>">
                                 </a>
-                            </h3>
-                            <div class="product-price">
-                                <?php echo number_format($related->price, 0, ',', '.'); ?>₫
                             </div>
-                            <div class="product-rating">
-                                <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <i class="fas fa-star<?php echo $i <= $related->rating ? ' active' : ''; ?>"></i>
-                                <?php endfor; ?>
-                                <span class="rating-count">(<?php echo $related->rating_count; ?>)</span>
-                            </div>
-                            <div class="product-actions">
-                                <button class="btn-add-to-cart" onclick="addToCart(<?php echo $related->id; ?>)">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                                <a href="/Product/show/<?php echo $related->id; ?>" class="btn-view-detail">
-                                    <i class="fas fa-eye"></i>
-                                </a>
+                            <div class="product-info">
+                                <h3 class="product-name">
+                                    <a href="/Product/show/<?php echo $related->id; ?>">
+                                        <?php echo htmlspecialchars($related->name); ?>
+                                    </a>
+                                </h3>
+                                <div class="product-price">
+                                    <?php echo number_format($related->price, 0, ',', '.'); ?>₫
+                                </div>
+                                <div class="product-rating">
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <i class="fas fa-star<?php echo $i <= $related->rating ? ' active' : ''; ?>"></i>
+                                    <?php endfor; ?>
+                                    <span class="rating-count">(<?php echo $related->rating_count; ?>)</span>
+                                </div>
+                                <div class="product-actions">
+                                    <button class="btn-add-to-cart" onclick="addToCart(<?php echo $related->id; ?>)">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                    <a href="/Product/show/<?php echo $related->id; ?>" class="btn-view-detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="no-products">Không có sản phẩm liên quan.</p>
-            <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p class="no-products">Không có sản phẩm liên quan.</p>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
@@ -866,13 +869,30 @@
         thumbnails.forEach(thumb => {
             thumb.addEventListener('click', function() {
                 const imgSrc = this.getAttribute('data-src');
-                mainImage.src = imgSrc;
                 
-                // Đặt lại trạng thái active
-                thumbnails.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
+                // Tạo ảnh tạm thời để đảm bảo ảnh mới được tải trước khi hiển thị
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    mainImage.src = imgSrc;
+                    
+                    // Reset transform nếu có để tránh hiệu ứng zoom lệch
+                    mainImage.style.transform = 'none';
+                    
+                    // Đặt lại trạng thái active
+                    thumbnails.forEach(t => t.classList.remove('active'));
+                    thumb.classList.add('active');
+                };
+                tempImg.src = imgSrc;
             });
         });
+        
+        // Đảm bảo ảnh đầu tiên hiển thị đúng khi tải trang
+        if (mainImage) {
+            mainImage.addEventListener('load', function() {
+                // Đảm bảo ảnh luôn được căn giữa
+                this.style.objectPosition = 'center';
+            });
+        }
         
         // Xử lý chuyển tab
         const tabButtons = document.querySelectorAll('.tab-button');

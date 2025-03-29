@@ -578,6 +578,70 @@
     .rating-select option i, .rating-select option .fa-star {
         color: #FFCC00;
     }
+
+    /* CSS cho phần bestseller */
+    .bestseller-section {
+        margin: 50px 0;
+        padding: 30px 0;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        color: var(--text-dark);
+        margin-bottom: 10px;
+    }
+
+    .section-subtitle {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .bestseller-grid {
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    }
+
+    .badge-bestseller {
+        background-color: #ff6b6b;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .bestseller-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+        }
+        
+        .bestseller-section {
+            margin: 30px 0;
+            padding: 20px 0;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .bestseller-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+        }
+        
+        .section-subtitle {
+            font-size: 0.9rem;
+        }
+    }
 </style>
 <!-- Banner quảng cáo hiện đại -->
 <div class="hero-banner">
@@ -588,8 +652,8 @@
                 <h1 class="banner-title">Giảm giá đến <span class="highlight">33%</span></h1>
                 <p class="banner-subtitle">Nhập mã <span class="promo-code">SPRING33</span> khi thanh toán</p>
                 <div class="banner-cta">
-                    <a href="/promotion" class="btn-primary">Khám phá ngay</a>
-                    <a href="/collections/bestsellers" class="btn-secondary">Xem sản phẩm bán chạy</a>
+                    <a href="#product-section" class="btn-primary">Khám phá ngay</a>
+                    <a href="#bestseller-section" class="btn-secondary">Xem sản phẩm bán chạy</a>
                 </div>
             </div>
             <!-- Thay thế phần decoration bằng hình ảnh banner -->
@@ -602,7 +666,7 @@
 
 <!-- Phần danh mục sản phẩm -->
 <div class="container">
-    <div class="section-catalog">
+    <div class="section-catalog" id="product-section">
         <!-- Điều hướng và tìm kiếm -->
         <div class="catalog-header">
             <div class="breadcrumb">
@@ -888,6 +952,97 @@
                     </div>
                 <?php endif; ?>
             </div>
+        </div>
+    </div>
+
+    <!-- Phần sản phẩm bán chạy -->
+    <div class="bestseller-section" id="bestseller-section">
+        <div class="section-header">
+            <h2 class="section-title">Sản phẩm bán chạy</h2>
+            <p class="section-subtitle">Những sản phẩm được khách hàng yêu thích nhất</p>
+        </div>
+        
+        <div class="product-grid bestseller-grid">
+            <?php 
+            // Hiển thị 4 sản phẩm bán chạy đầu tiên (nếu có)
+            $bestsellers = array_slice($products, 0, 4);
+            foreach ($bestsellers as $product): 
+            ?>
+                <div class="product-card">
+                    <div class="product-badges">
+                        <span class="badge badge-sale">-33%</span>
+                        <span class="badge badge-bestseller">Hot</span>
+                    </div>
+                    
+                    <div class="product-thumb">
+                        <a href="/Product/show/<?php echo $product->id; ?>" class="image-wrapper">
+                            <?php if (!empty($product->image)): ?>
+                                <img src="/<?php echo htmlspecialchars($product->image, ENT_QUOTES, 'UTF-8'); ?>" 
+                                    alt="<?php echo htmlspecialchars($product->name, ENT_QUOTES, 'UTF-8'); ?>" 
+                                    class="product-img">
+                            <?php else: ?>
+                                <div class="no-image">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            <?php endif; ?>
+                        </a>
+                        
+                        <div class="hover-action">
+                            <a href="/Product/addToCart/<?php echo $product->id; ?>" class="btn-add-to-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Thêm vào giỏ</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-info">
+                        <?php if (!empty($product->category_name)): ?>
+                            <div class="product-category">
+                                <a href="/category/<?php echo strtolower($product->category_name); ?>">
+                                    <?php echo htmlspecialchars($product->category_name, ENT_QUOTES, 'UTF-8'); ?>
+                                </a>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <h3 class="product-name">
+                            <a href="/Product/show/<?php echo $product->id; ?>">
+                                <?php echo htmlspecialchars($product->name, ENT_QUOTES, 'UTF-8'); ?>
+                            </a>
+                        </h3>
+                        
+                        <div class="product-rating">
+                            <div class="stars">
+                                <?php 
+                                // Đảm bảo rating là số hợp lệ
+                                $rating = isset($product->rating) ? floatval($product->rating) : 0;
+                                // Hiển thị 5 sao với class active cho những sao đạt rating
+                                for ($i = 1; $i <= 5; $i++): 
+                                ?>
+                                    <i class="fas fa-star <?php echo ($i <= $rating) ? 'active' : ''; ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <span class="rating-count">(<?php echo $product->rating_count ?? 0; ?>)</span>
+                        </div>
+                        
+                        <div class="product-price">
+                            <span class="current-price"><?php echo number_format($product->price, 0, ',', '.'); ?>₫</span>
+                            <?php if (!empty($product->old_price) && $product->old_price > $product->price): ?>
+                                <span class="old-price"><?php echo number_format($product->old_price, 0, ',', '.'); ?>₫</span>
+                                <?php 
+                                    $discount_percent = round(($product->old_price - $product->price) / $product->old_price * 100);
+                                ?>
+                                <span class="discount-badge">-<?php echo $discount_percent; ?>%</span>
+                            <?php else: ?>
+                                <?php 
+                                    $original_price = round($product->price / 0.67);
+                                ?>
+                                <span class="old-price"><?php echo number_format($original_price, 0, ',', '.'); ?>₫</span>
+                                <span class="discount-badge">-33%</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>
@@ -1608,6 +1763,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     `;
     document.head.appendChild(cartCountStyle);
+
+    // Xử lý cuộn mượt đến phần sản phẩm khi nhấp vào "Khám phá ngay"
+    const smoothScrollLinks = document.querySelectorAll('a[href^="#"]');
+    
+    smoothScrollLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const targetId = this.getAttribute('href');
+            if (!targetId || targetId === '#') return;
+            
+            const targetElement = document.querySelector(targetId);
+            if (!targetElement) return;
+            
+            // Cuộn đến vị trí mục tiêu với hiệu ứng mượt
+            window.scrollTo({
+                top: targetElement.offsetTop - 80, // Trừ đi chiều cao của header
+                behavior: 'smooth'
+            });
+        });
+    });
 });
 
 // Hàm cập nhật số lượng sản phẩm cho mỗi danh mục

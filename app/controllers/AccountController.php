@@ -113,4 +113,89 @@ class AccountController extends Controller {
             include_once 'app/views/account/login.php';
         }
     }
+
+    public function profile() {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /account/login');
+            exit();
+        }
+        
+        $user_id = $_SESSION['user_id'];
+        $account = $this->accountModel->getAccountById($user_id);
+        
+        if (!$account) {
+            header('Location: /Product/');
+            exit();
+        }
+        
+        include_once 'app/views/account/profile.php';
+    }
+    
+    public function updateProfile() {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /account/login');
+            exit();
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $user_id = $_SESSION['user_id'];
+            $fullName = $_POST['fullname'] ?? '';
+            $currentPassword = $_POST['current_password'] ?? '';
+            $newPassword = $_POST['new_password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
+            
+            $errors = [];
+            
+            if (empty($fullName)) {
+                $errors['fullname'] = "Vui lòng nhập họ và tên!";
+            }
+            
+            $account = $this->accountModel->getAccountById($user_id);
+            
+            // Nếu người dùng muốn thay đổi mật khẩu
+            if (!empty($newPassword)) {
+                if (empty($currentPassword)) {
+                    $errors['current_password'] = "Vui lòng nhập mật khẩu hiện tại!";
+                } else if (!password_verify($currentPassword, $account->password)) {
+                    $errors['current_password'] = "Mật khẩu hiện tại không đúng!";
+                }
+                
+                if (strlen($newPassword) < 6) {
+                    $errors['new_password'] = "Mật khẩu mới phải có ít nhất 6 ký tự!";
+                }
+                
+                if ($newPassword != $confirmPassword) {
+                    $errors['confirm_password'] = "Mật khẩu xác nhận không khớp với mật khẩu mới!";
+                }
+            }
+            
+            if (count($errors) > 0) {
+                include_once 'app/views/account/profile.php';
+                return;
+            }
+            
+            // Cập nhật thông tin cá nhân
+            $updateData = ['fullname' => $fullName];
+            
+            // Nếu có mật khẩu mới, cập nhật mật khẩu
+            if (!empty($newPassword)) {
+                $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => 12]);
+                $updateData['password'] = $hashedPassword;
+            }
+            
+            $result = $this->accountModel->updateAccount($user_id, $updateData);
+            
+            if ($result) {
+                $success = "Cập nhật thông tin thành công!";
+                $account = $this->accountModel->getAccountById($user_id); // Tải lại thông tin tài khoản
+                include_once 'app/views/account/profile.php';
+            } else {
+                $errors['update'] = "Đã xảy ra lỗi khi cập nhật thông tin!";
+                include_once 'app/views/account/profile.php';
+            }
+        } else {
+            header('Location: /account/profile');
+            exit();
+        }
+    }
 }

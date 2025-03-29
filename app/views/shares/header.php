@@ -96,14 +96,18 @@
 
         .navbar-toggler {
             border: none;
-            padding: 4px;
+            padding: 10px 12px;
             color: var(--white);
             font-size: 1.2rem;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            margin-left: auto;
+            cursor: pointer;
+            z-index: 1001;
         }
 
-        .navbar-toggler:focus {
-            outline: none;
-            box-shadow: none;
+        .navbar-toggler i {
+            color: white;
         }
 
         .navbar-nav {
@@ -246,6 +250,7 @@
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             font-size: 0.9rem;
             margin-right: 8px;
+            text-decoration: none;
         }
 
         .admin-dropdown-link:hover, 
@@ -253,11 +258,13 @@
             background-color: rgba(255, 255, 255, 0.9);
             color: var(--primary-dark) !important;
             transform: translateY(-1px);
+            text-decoration: none;
         }
 
         .admin-dropdown-link i {
             font-size: 1rem;
             margin-right: 6px;
+            color: var(--primary-dark);
         }
 
         .login-button {
@@ -356,59 +363,162 @@
 
         /* Responsive Adjustments */
         @media (max-width: 992px) {
-            .navbar-search-box {
-                margin: 8px 0;
-                min-width: 140px;
-                max-width: 180px;
+            .navbar-container {
+                flex-wrap: wrap;
+                padding: 8px 15px;
             }
-
+            
+            .navbar-toggler {
+                display: block !important;
+                order: 2;
+            }
+            
+            .navbar-brand {
+                flex: 1;
+                order: 1;
+            }
+            
+            .navbar-search-box {
+                order: 3;
+                margin: 10px 0;
+                min-width: 100%;
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .navbar-search-input {
+                width: 100% !important;
+            }
+            
             .navbar-search-input:focus {
                 width: 100% !important;
-                max-width: 200px !important;
+                max-width: 100% !important;
             }
-
+            
+            .navbar-collapse {
+                order: 4;
+                flex-basis: 100%;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            
             .navbar-nav {
                 margin-top: 8px;
+                flex-direction: column;
+                width: 100%;
             }
-
+            
             .nav-item {
                 width: 100%;
                 margin: 3px 0;
             }
-
+            
             .nav-link {
                 display: block;
+                text-align: left;
+                padding: 10px !important;
+                border-radius: 8px;
+                width: 100%;
+            }
+            
+            .nav-link i {
+                width: 20px;
                 text-align: center;
-                padding: 8px !important;
+                margin-right: 10px;
+            }
+            
+            .navbar-nav.ml-auto {
+                margin-top: 15px;
+            }
+            
+            .dropdown-menu-11 {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                margin-top: 5px;
+                border: none;
+                background-color: white !important;
+                padding: 0;
+            }
+            
+            .dropdown-item {
+                padding: 10px 15px 10px 35px;
+                color: var(--primary-dark) !important;
+                background-color: white !important;
+            }
+            
+            .dropdown-item i {
+                color: var(--primary-dark) !important;
+            }
+            
+            .dropdown-item:hover, 
+            .dropdown-item:focus,
+            .dropdown-item.active {
+                background-color: rgba(232, 245, 233, 0.8) !important;
+                color: var(--primary-dark) !important;
+            }
+
+            .admin-dropdown-link, 
+            .username-link {
+                background-color: white !important;
+                color: var(--primary-dark) !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+                justify-content: flex-start;
+                border-radius: 8px;
+            }
+
+            .admin-dropdown-link i, 
+            .username-link i {
+                color: var(--primary-dark) !important;
+            }
+
+            .cart-text {
+                display: inline-block !important;
+                margin-left: 8px;
+            }
+            
+            .nav-link.cart-link {
+                display: flex !important;
+                align-items: center !important;
             }
         }
 
         @media (max-width: 576px) {
+            .main-container {
+                padding-top: 120px !important;
+            }
+            
             .navbar-brand {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
+            }
+
+            .navbar-brand span {
+                display: none;
             }
 
             .navbar-brand i {
                 font-size: 1.3rem;
+                margin-right: 0;
             }
-
-            .navbar-search-box {
-                min-width: 120px;
-                max-width: 150px;
+            
+            .nav-link {
+                font-size: 0.85rem;
+                padding: 8px 12px !important;
             }
-
-            .navbar-search-box form {
-                width: 100%;
+            
+            .cart-link .badge {
+                font-size: 0.6rem;
             }
-
+            
             .navbar-search-input {
                 font-size: 0.8rem !important;
-                padding: 5px 8px 5px 30px !important;
+                padding: 8px 15px 8px 35px !important;
             }
-
+            
             .navbar-search-icon {
                 font-size: 0.8rem !important;
-                left: 10px !important;
+                left: 12px !important;
             }
         }
 
@@ -419,7 +529,7 @@
             border: 1px solid var(--border-color);
             padding: 10px 0;
             margin-top: 8px;
-            background-color: #ffffff;
+            background-color: white;
             animation: slideDown 0.2s ease;
             display: none;
             position: absolute;
@@ -431,6 +541,151 @@
 
         .dropdown-menu-11.show {
             display: block;
+        }
+
+        .dropdown-menu-11 .dropdown-item {
+            padding: 8px 16px;
+            color: var(--text-dark);
+            font-size: 0.85rem;
+            transition: all var(--transition-speed) ease;
+            display: block;
+            text-decoration: none;
+        }
+
+        .dropdown-menu-11 .dropdown-item i {
+            margin-right: 8px;
+            color: var(--primary-color);
+            width: 18px;
+            text-align: center;
+        }
+
+        .dropdown-menu-11 .dropdown-item:hover, 
+        .dropdown-menu-11 .dropdown-item:focus {
+            background-color: #f8f9fa;
+            color: var(--primary-dark);
+        }
+
+        .dropdown-menu-11 .dropdown-item.active {
+            background-color: #e8f5e9;
+            color: var(--primary-dark);
+        }
+
+        @media (max-width: 992px) {
+            .dropdown-menu-11 {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                margin-top: 5px;
+                border: none;
+                background-color: white !important;
+                padding: 0;
+            }
+            
+            .dropdown-menu-11 .dropdown-item {
+                padding: 10px 15px 10px 35px;
+                color: var(--primary-dark) !important;
+                background-color: white !important;
+            }
+
+            .dropdown-menu-11 .dropdown-item i {
+                color: var(--primary-dark) !important;
+            }
+            
+            .dropdown-menu-11 .dropdown-item:hover, 
+            .dropdown-menu-11 .dropdown-item:focus,
+            .dropdown-menu-11 .dropdown-item.active {
+                background-color: rgba(232, 245, 233, 0.8) !important;
+                color: var(--primary-dark) !important;
+            }
+
+            .admin-dropdown-link, 
+            .username-link {
+                background-color: white !important;
+                color: var(--primary-dark) !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+                justify-content: flex-start;
+                border-radius: 8px;
+            }
+
+            .admin-dropdown-link i, 
+            .username-link i {
+                color: var(--primary-dark) !important;
+            }
+        }
+
+        .navbar-collapse {
+            display: none;
+            width: 100%;
+        }
+        
+        .navbar-collapse.show {
+            display: block !important;
+            visibility: visible !important;
+            height: auto !important;
+            opacity: 1 !important;
+            overflow: visible !important;
+        }
+        
+        @media (min-width: 993px) {
+            .navbar-collapse {
+                display: flex !important;
+                visibility: visible !important;
+                height: auto !important;
+                width: auto;
+            }
+            
+            .navbar-toggler {
+                display: none !important;
+            }
+        }
+
+        /* Mobile menu styles */
+        .navbar-toggler {
+            border: none;
+            padding: 10px 12px;
+            color: var(--white);
+            font-size: 1.2rem;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            margin-left: auto;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        .navbar-toggler i {
+            color: white;
+        }
+        
+        /* Hiển thị navbar-toggler trên mobile */
+        @media (max-width: 992px) {
+            .navbar-toggler {
+                display: block !important;
+                order: 2;
+            }
+            
+            .navbar-collapse.show {
+                display: block !important;
+                visibility: visible !important;
+                height: auto !important;
+                opacity: 1 !important;
+                overflow: visible !important;
+                margin-top: 10px !important;
+                width: 100% !important;
+                transition: all 0.3s ease !important;
+            }
+            
+            /* Thêm style đặc biệt để đảm bảo menu hiển thị */
+            #navbarNav.show {
+                display: block !important;
+                max-height: 1000px !important;
+            }
+            
+            /* Hiệu ứng cho menu khi mở */
+            .navbar-collapse {
+                transition: max-height 0.3s ease-in-out !important;
+                max-height: 0 !important;
+                overflow: hidden !important;
+            }
         }
     </style>
 </head>
@@ -444,8 +699,7 @@
             </a>
 
             <!-- Toggler for Mobile -->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" id="navbarTogglerBtn">
                 <i class="fas fa-bars"></i>
             </button>
 
@@ -502,6 +756,7 @@
                         <a class="nav-link cart-link <?php echo (strpos($_SERVER['REQUEST_URI'], '/Product/cart') === 0) ? 'active' : ''; ?>" href="/Product/cart">
                             <i class="fas fa-shopping-cart"></i>
                             <span class="badge cart-count"><?php echo array_sum(array_column($_SESSION['cart'] ?? [], 'quantity')) ?? 0; ?></span>
+                            <span class="cart-text d-none d-lg-none">Giỏ hàng</span>
                         </a>
                     </li>
 
@@ -545,7 +800,7 @@
     </div>
 
     <!-- Bootstrap JS, Popper.js, and jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
@@ -561,8 +816,24 @@
             }
         });
 
-        // Xử lý dropdown admin
+        // Menu hamburger trên mobile
         document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý toggle menu hamburger (nút 3 gạch)
+            const navbarToggler = document.getElementById('navbarTogglerBtn');
+            const navbarCollapse = document.getElementById('navbarNav');
+            
+            if (navbarToggler) {
+                // Đơn giản hóa xử lý click cho button hamburger
+                navbarToggler.onclick = function(e) {
+                    e.preventDefault();
+                    if (navbarCollapse) {
+                        navbarCollapse.classList.toggle('show');
+                        console.log('Menu hamburger toggled');
+                    }
+                    return false;
+                };
+            }
+
             // Xử lý dropdown admin
             const adminDropdown = document.getElementById('adminDropdown');
             if (adminDropdown) {
@@ -570,16 +841,13 @@
                     e.preventDefault();
                     e.stopPropagation();
                     const dropdownMenu = this.nextElementSibling;
-                    dropdownMenu.classList.toggle('show');
-                });
-
-                // Đóng dropdown khi click ra ngoài
-                document.addEventListener('click', function(e) {
-                    if (!adminDropdown.contains(e.target)) {
-                        const dropdownMenu = adminDropdown.nextElementSibling;
-                        if (dropdownMenu && dropdownMenu.classList.contains('show')) {
-                            dropdownMenu.classList.remove('show');
-                        }
+                    if (dropdownMenu) {
+                        // Đóng tất cả dropdown khác
+                        document.querySelectorAll('.dropdown-menu-11.show').forEach(menu => {
+                            if (menu !== dropdownMenu) menu.classList.remove('show');
+                        });
+                        // Toggle dropdown hiện tại
+                        dropdownMenu.classList.toggle('show');
                     }
                 });
             }
@@ -589,20 +857,39 @@
             if (userDropdown) {
                 userDropdown.addEventListener('click', function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     const dropdownMenu = this.nextElementSibling;
-                    dropdownMenu.classList.toggle('show');
-                });
-
-                // Đóng dropdown khi click ra ngoài
-                document.addEventListener('click', function(e) {
-                    if (!userDropdown.contains(e.target)) {
-                        const dropdownMenu = userDropdown.nextElementSibling;
-                        if (dropdownMenu && dropdownMenu.classList.contains('show')) {
-                            dropdownMenu.classList.remove('show');
-                        }
+                    if (dropdownMenu) {
+                        // Đóng tất cả dropdown khác
+                        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                            if (menu !== dropdownMenu) menu.classList.remove('show');
+                        });
+                        // Toggle dropdown hiện tại
+                        dropdownMenu.classList.toggle('show');
                     }
                 });
             }
+            
+            // Đóng dropdown khi click ra ngoài
+            document.addEventListener('click', function(e) {
+                // Đóng dropdown admin nếu click bên ngoài
+                const adminDropdown = document.getElementById('adminDropdown');
+                if (adminDropdown && !adminDropdown.contains(e.target)) {
+                    const dropdownMenu = adminDropdown.nextElementSibling;
+                    if (dropdownMenu && dropdownMenu.classList.contains('show')) {
+                        dropdownMenu.classList.remove('show');
+                    }
+                }
+                
+                // Đóng dropdown user nếu click bên ngoài
+                const userDropdown = document.getElementById('userDropdown');
+                if (userDropdown && !userDropdown.contains(e.target)) {
+                    const dropdownMenu = userDropdown.nextElementSibling;
+                    if (dropdownMenu && dropdownMenu.classList.contains('show')) {
+                        dropdownMenu.classList.remove('show');
+                    }
+                }
+            });
             
             // Tạo hàm cập nhật số lượng giỏ hàng toàn cục
             window.updateCartCount = function(count) {

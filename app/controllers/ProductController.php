@@ -325,7 +325,7 @@ class ProductController extends Controller
     {
         $cart = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
         $total = $this->calculateCartTotal($cart);
-        include 'app/views/product/cart.php';
+        include 'app/views/product/Cart.php';
     }
 
     public function updateCart() 
@@ -656,7 +656,7 @@ class ProductController extends Controller
         }
         
         // Truyền biến vào view
-        include 'app/views/product/checkout.php';
+        include 'app/views/product/Checkout.php';
     }
  
     public function processCheckout() 
