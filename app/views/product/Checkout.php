@@ -362,6 +362,7 @@
                 <div class="form-group">
                     <label for="name">Họ tên</label>
                     <input type="text" id="name" name="name" class="form-control" 
+                           value="<?php echo isset($user) ? htmlspecialchars($user->name) : ''; ?>"
                            required pattern="^[A-Za-zÀ-ỹ\s]{2,50}$" 
                            title="Vui lòng nhập tên hợp lệ (2-50 ký tự)">
                 </div>
@@ -369,6 +370,7 @@
                 <div class="form-group">
                     <label for="phone">Số điện thoại</label>
                     <input type="tel" id="phone" name="phone" class="form-control" 
+                           value="<?php echo isset($user) ? htmlspecialchars($user->phone ?? '') : ''; ?>"
                            required pattern="^(0[3|5|7|8|9])+([0-9]{8})$" 
                            title="Vui lòng nhập số điện thoại hợp lệ">
                 </div>
@@ -377,7 +379,7 @@
                     <label for="address">Địa chỉ giao hàng</label>
                     <textarea id="address" name="address" class="form-control" rows="3"
                               required minlength="5" maxlength="250" 
-                              title="Vui lòng nhập địa chỉ chi tiết (5-250 ký tự)"></textarea>
+                              title="Vui lòng nhập địa chỉ chi tiết (5-250 ký tự)"><?php echo isset($user) ? htmlspecialchars($user->address ?? '') : ''; ?></textarea>
                 </div>
                 
                 <div class="form-group">

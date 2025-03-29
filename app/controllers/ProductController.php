@@ -9,12 +9,20 @@ class ProductController extends Controller
 {
     private $productModel;
     private $inventoryModel;
+    private $orderModel;
 
     public function __construct() 
     {
         parent::__construct();
         $this->productModel = new ProductModel($this->db);
         $this->inventoryModel = new InventoryModel($this->db);
+        
+        // Tải OrderModel cho các phương thức liên quan đến đơn hàng
+        require_once('app/models/OrderModel.php');
+        $this->orderModel = new OrderModel($this->db);
+        
+        // Đảm bảo bảng orders có cột user_id
+        $this->ensureOrdersHasUserIdField();
     }
 
     
@@ -632,7 +640,8 @@ class ProductController extends Controller
     public function checkout() 
     {
         // Lấy giỏ hàng từ session
-        $cart = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
+        $cart = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];#
+        
         
         // Tính tổng tiền
         $total = $this->calculateCartTotal($cart);
@@ -655,6 +664,17 @@ class ProductController extends Controller
             }
         }
         
+        // Lấy thông tin người dùng nếu đã đăng nhập
+        $user = null;
+        if (isset($_SESSION['user_id'])) {
+            // Lấy thông tin user từ database
+            $query = "SELECT * FROM users WHERE id = :user_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':user_id', $_SESSION['user_id']);
+            $stmt->execute();
+            $user = $stmt->fetch(PDO::FETCH_OBJ);
+        }
+        
         // Truyền biến vào view
         include 'app/views/product/Checkout.php';
     }
@@ -667,6 +687,9 @@ class ProductController extends Controller
             $address = $_POST['address']; 
             $note = isset($_POST['note']) ? $_POST['note'] : '';
             $payment_method = isset($_POST['payment_method']) ? $_POST['payment_method'] : 'cod';
+            
+            // Get user_id if logged in
+            $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
             if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) { 
                 $_SESSION['error'] = "Giỏ hàng trống.";
@@ -691,8 +714,9 @@ class ProductController extends Controller
 
             try { 
                 // Tạo đơn hàng mới
-                $query = "INSERT INTO orders (name, phone, address, note, payment_method) VALUES (:name, :phone, :address, :note, :payment_method)"; 
+                $query = "INSERT INTO orders (user_id, name, phone, address, note, payment_method) VALUES (:user_id, :name, :phone, :address, :note, :payment_method)"; 
                 $stmt = $this->db->prepare($query); 
+                $stmt->bindParam(':user_id', $user_id); 
                 $stmt->bindParam(':name', $name); 
                 $stmt->bindParam(':phone', $phone); 
                 $stmt->bindParam(':address', $address); 
@@ -1273,6 +1297,120 @@ class ProductController extends Controller
         } catch (PDOException $e) {
             error_log('Lỗi khi lấy user_id từ username: ' . $e->getMessage());
             return 0;
+        }
+    }
+
+    public function myOrders() {
+        // Kiểm tra đăng nhập
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /account/login');
+            exit();
+        }
+        
+        $user_id = $_SESSION['user_id'];
+        
+        // Lấy danh sách đơn hàng của người dùng
+        $orders = $this->orderModel->getOrdersByUserId($user_id);
+        
+        // Hiển thị trang đơn hàng
+        include 'app/views/product/myOrders.php';
+    }
+    
+    public function orderDetail($id = null) {
+        // Kiểm tra đăng nhập
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /account/login');
+            exit();
+        }
+        
+        if ($id === null) {
+            header('Location: /Product/myOrders');
+            exit();
+        }
+        
+        $user_id = $_SESSION['user_id'];
+        
+        // Lấy thông tin đơn hàng và kiểm tra quyền truy cập
+        $order = $this->orderModel->getOrderById($id, $user_id);
+        
+        if (!$order) {
+            // Nếu không tìm thấy đơn hàng hoặc không có quyền truy cập
+            $_SESSION['order_error'] = "Không tìm thấy đơn hàng hoặc bạn không có quyền truy cập!";
+            header('Location: /Product/myOrders');
+            exit();
+        }
+        
+        // Lấy chi tiết các sản phẩm trong đơn hàng
+        $orderItems = $this->orderModel->getOrderItems($id);
+        
+        // Hiển thị trang chi tiết đơn hàng
+        include 'app/views/product/orderDetail.php';
+    }
+    
+    public function cancelOrder($id = null) {
+        // Kiểm tra đăng nhập
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /account/login');
+            exit();
+        }
+        
+        if ($id === null) {
+            header('Location: /Product/myOrders');
+            exit();
+        }
+        
+        $user_id = $_SESSION['user_id'];
+        
+        // Lấy thông tin đơn hàng và kiểm tra quyền hủy
+        $order = $this->orderModel->getOrderById($id, $user_id);
+        
+        if (!$order) {
+            // Nếu không tìm thấy đơn hàng hoặc không có quyền truy cập
+            $_SESSION['order_error'] = "Không tìm thấy đơn hàng hoặc bạn không có quyền truy cập!";
+            header('Location: /Product/myOrders');
+            exit();
+        }
+        
+        // Chỉ cho phép hủy đơn hàng ở trạng thái 'pending' hoặc 'processing'
+        if ($order->status == 'pending' || $order->status == 'processing') {
+            // Cập nhật trạng thái đơn hàng thành 'cancelled'
+            $result = $this->orderModel->updateOrderStatus($id, 'cancelled');
+            
+            if ($result) {
+                $_SESSION['order_message'] = "Đơn hàng đã được hủy thành công!";
+            } else {
+                $_SESSION['order_error'] = "Có lỗi xảy ra khi hủy đơn hàng!";
+            }
+        } else {
+            $_SESSION['order_error'] = "Không thể hủy đơn hàng ở trạng thái hiện tại!";
+        }
+        
+        header('Location: /Product/myOrders');
+        exit();
+    }
+
+    // Thêm hàm mới để kiểm tra và tạo cột user_id trong bảng orders nếu chưa tồn tại
+    private function ensureOrdersHasUserIdField() 
+    {
+        try {
+            // Kiểm tra xem cột user_id đã tồn tại trong bảng orders chưa
+            $query = "SHOW COLUMNS FROM orders LIKE 'user_id'";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $columnExists = $stmt->rowCount() > 0;
+            
+            if (!$columnExists) {
+                // Nếu cột chưa tồn tại, thêm nó vào
+                $alterTable = "ALTER TABLE orders ADD COLUMN user_id INT(11) DEFAULT NULL AFTER id";
+                $this->db->exec($alterTable);
+                
+                return true;
+            }
+            
+            return $columnExists;
+        } catch (PDOException $e) {
+            error_log('Lỗi kiểm tra/tạo cột user_id trong bảng orders: ' . $e->getMessage());
+            return false;
         }
     }
 }
