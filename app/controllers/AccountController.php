@@ -238,4 +238,111 @@ class AccountController extends Controller {
         // Hiển thị view chỉ để xem thông tin
         include_once 'app/views/account/viewUser.php';
     }
+    
+    // Hiển thị danh sách tất cả người dùng
+    public function listUsers($page = 1) {
+        // Kiểm tra quyền admin
+        if (!SessionHelper::isAdmin()) {
+            $_SESSION['error'] = "Bạn không có quyền truy cập chức năng này!";
+            header('Location: /account/profile');
+            exit();
+        }
+        
+        $limit = 10; // Số người dùng trên một trang
+        $offset = ($page - 1) * $limit;
+        
+        // Lấy danh sách người dùng
+        $users = $this->accountModel->getAllUsers($limit, $offset);
+        $totalUsers = $this->accountModel->countTotalUsers();
+        
+        // Tính toán phân trang
+        $totalPages = ceil($totalUsers / $limit);
+        
+        // Hiển thị view danh sách người dùng với dữ liệu đã được truyền vào
+        include_once 'app/views/account/listUsers.php';
+    }
+    
+    // Cập nhật vai trò của người dùng
+    public function updateRole($id, $newRole) {
+        // Kiểm tra quyền admin
+        if (!SessionHelper::isAdmin()) {
+            $_SESSION['error'] = "Bạn không có quyền truy cập chức năng này!";
+            header('Location: /account/profile');
+            exit();
+        }
+        
+        // Kiểm tra xem người dùng có tồn tại không
+        $account = $this->accountModel->getAccountById($id);
+        
+        if (!$account) {
+            $_SESSION['error'] = "Không tìm thấy tài khoản!";
+            header('Location: /account/listUsers');
+            exit();
+        }
+        
+        // Không cho phép hạ quyền chính mình
+        if ($id == $_SESSION['user_id'] && $newRole != 'admin' && $account->role == 'admin') {
+            $_SESSION['error'] = "Bạn không thể hạ quyền của chính mình!";
+            header('Location: /account/listUsers');
+            exit();
+        }
+        
+        // Kiểm tra vai trò hợp lệ
+        if ($newRole != 'admin' && $newRole != 'user') {
+            $_SESSION['error'] = "Vai trò không hợp lệ!";
+            header('Location: /account/listUsers');
+            exit();
+        }
+        
+        // Thực hiện cập nhật vai trò
+        $updateData = ['role' => $newRole];
+        $result = $this->accountModel->updateAccount($id, $updateData);
+        
+        if ($result) {
+            $_SESSION['success'] = "Cập nhật vai trò thành công!";
+        } else {
+            $_SESSION['error'] = "Có lỗi xảy ra khi cập nhật vai trò!";
+        }
+        
+        header('Location: /account/listUsers');
+        exit();
+    }
+    
+    // Xóa tài khoản người dùng
+    public function delete($id) {
+        // Kiểm tra quyền admin
+        if (!SessionHelper::isAdmin()) {
+            $_SESSION['error'] = "Bạn không có quyền truy cập chức năng này!";
+            header('Location: /account/profile');
+            exit();
+        }
+        
+        // Kiểm tra xem người dùng có tồn tại không
+        $account = $this->accountModel->getAccountById($id);
+        
+        if (!$account) {
+            $_SESSION['error'] = "Không tìm thấy tài khoản!";
+            header('Location: /account/listUsers');
+            exit();
+        }
+        
+        // Không cho phép xóa tài khoản admin
+        if ($account->role == 'admin') {
+            $_SESSION['error'] = "Không thể xóa tài khoản quản trị viên!";
+            header('Location: /account/listUsers');
+            exit();
+        }
+        
+        // Thực hiện xóa tài khoản
+        $result = $this->accountModel->deleteAccount($id);
+        
+        if ($result) {
+            $_SESSION['success'] = "Xóa tài khoản thành công!";
+        } else {
+            $_SESSION['error'] = "Có lỗi xảy ra khi xóa tài khoản!";
+        }
+        
+        header('Location: /account/listUsers');
+        exit();
+    }
 }

@@ -42,9 +42,17 @@ class BaseController
     }
     
     // Check if a page is current
-    protected function isCurrentPage($page)
+    public function isCurrentPage($page)
     {
         $url = $_GET['url'] ?? '';
         return strpos($url, trim($page, '/')) === 0;
+    }
+    
+    // Liệt kê danh sách người dùng (để quản lý)
+    public function listUsers() 
+    {
+        // Redirect to account controller method
+        header('Location: /account/listUsers');
+        exit;
     }
 } 

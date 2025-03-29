@@ -87,7 +87,28 @@
 
             <!-- Sidebar Menu -->
             <nav class="mt-2">
-                <?php include 'app/views/admin/layouts/sidebar.php'; ?>
+                <?php 
+                // Kiểm tra xem biến $viewHelper đã được định nghĩa chưa
+                if (!isset($viewHelper)) {
+                    $viewHelper = new class {
+                        public function isCurrentPage($page) {
+                            $url = $_GET['url'] ?? '';
+                            return strpos($url, trim($page, '/')) === 0;
+                        }
+                        
+                        public function model($modelName) {
+                            require_once 'app/models/' . $modelName . '.php';
+                            $db = (new Database())->getConnection();
+                            return new $modelName($db);
+                        }
+                    };
+                }
+                
+                // Thiết lập biến $helper để sử dụng trong sidebar
+                $helper = $viewHelper;
+                
+                include 'app/views/admin/layouts/sidebar.php'; 
+                ?>
             </nav>
             <!-- /.sidebar-menu -->
         </div>
