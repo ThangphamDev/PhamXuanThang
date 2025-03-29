@@ -207,4 +207,35 @@ class AccountController extends Controller {
             exit();
         }
     }
+
+    public function edit($id = null) {
+        // Kiểm tra quyền admin
+        if (!SessionHelper::isAdmin()) {
+            $_SESSION['error'] = "Bạn không có quyền truy cập chức năng này!";
+            header('Location: /account/profile');
+            exit();
+        }
+        
+        // Nếu không có ID, sử dụng ID người dùng hiện tại
+        if ($id === null) {
+            $id = $_SESSION['user_id'];
+        }
+        
+        // Lấy thông tin tài khoản
+        $account = $this->accountModel->getAccountById($id);
+        
+        if (!$account) {
+            $_SESSION['error'] = "Không tìm thấy tài khoản!";
+            header('Location: /account/profile');
+            exit();
+        }
+        
+        // Lấy đơn hàng của người dùng này
+        require_once('app/models/OrderModel.php');
+        $orderModel = new OrderModel($this->db);
+        $orders = $orderModel->getOrdersByUserId($id);
+        
+        // Hiển thị view chỉ để xem thông tin
+        include_once 'app/views/account/viewUser.php';
+    }
 }

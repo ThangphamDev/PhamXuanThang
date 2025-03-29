@@ -97,5 +97,49 @@ class AccountModel
         
         return false;
     }
+
+    public function countTotalUsers() 
+    {
+        $query = "SELECT COUNT(*) as total FROM " . $this->table_name;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        return $result->total;
+    }
+    
+    public function getAllUsers($limit = 10, $offset = 0) 
+    {
+        $query = "SELECT * FROM " . $this->table_name . " ORDER BY id DESC LIMIT :limit OFFSET :offset";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+    
+    public function deleteAccount($id) 
+    {
+        // Kiểm tra xem tài khoản có phải là admin không
+        $query = "SELECT role FROM " . $this->table_name . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        
+        if ($result && $result->role === 'admin') {
+            return false; // Không cho phép xóa tài khoản admin
+        }
+        
+        // Tiến hành xóa tài khoản
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        
+        if ($stmt->execute()) {
+            return true;
+        }
+        
+        return false;
+    }
 }
 ?>

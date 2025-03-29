@@ -266,7 +266,7 @@
                             <?php if (isset($user->email)): ?>
                             <p><strong><i class="fas fa-envelope mr-1"></i> Email:</strong> <?php echo htmlspecialchars($user->email); ?></p>
                             <?php endif; ?>
-                            <a href="/admin/users/edit/<?php echo $user->id; ?>" class="btn btn-sm btn-outline-primary">
+                            <a href="/account/edit/<?php echo $user->id; ?>" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-user-edit"></i> Xem thông tin tài khoản
                             </a>
                             <?php endif; ?>
