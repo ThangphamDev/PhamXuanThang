@@ -403,4 +403,24 @@ class OrderModel
         
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
+    
+    // Lấy danh sách đơn hàng đang chờ phê duyệt
+    public function getPendingOrders($limit = 5)
+    {
+        $query = "
+            SELECT o.*, 
+                  (SELECT COUNT(*) FROM order_details WHERE order_id = o.id) as item_count,
+                  (SELECT SUM(price * quantity) FROM order_details WHERE order_id = o.id) as total_amount
+            FROM orders o
+            WHERE o.status = 'pending'
+            ORDER BY o.created_at DESC
+            LIMIT :limit
+        ";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
 } 

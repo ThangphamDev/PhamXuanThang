@@ -1,20 +1,19 @@
 <?php
-class OrderController extends BaseController
+require_once 'app/controllers/admin/BaseController.php';
+
+class OrdersController extends BaseController
 {
     private $orderModel;
-    private $userModel;
+    private $accountModel;
     private $productModel;
     private $itemsPerPage = 10;
 
     public function __construct()
     {
-        if (!$this->isAdmin()) {
-            header('Location: /account/login');
-            exit;
-        }
+        parent::__construct();
         
         $this->orderModel = $this->model('OrderModel');
-        $this->userModel = $this->model('UserModel');
+        $this->accountModel = $this->model('AccountModel');
         $this->productModel = $this->model('ProductModel');
     }
     
@@ -64,7 +63,7 @@ class OrderController extends BaseController
     }
     
     // Xem chi tiết đơn hàng
-    public function view($id)
+    public function viewOrder($id)
     {
         $order = $this->orderModel->getOrderById($id);
         
@@ -80,7 +79,7 @@ class OrderController extends BaseController
         // Lấy thông tin người dùng
         $user = null;
         if (!empty($order->user_id)) {
-            $user = $this->userModel->getUserById($order->user_id);
+            $user = $this->accountModel->getAccountById($order->user_id);
         }
         
         // Hiển thị view
@@ -94,6 +93,9 @@ class OrderController extends BaseController
     // Cập nhật trạng thái đơn hàng
     public function updateStatus($id, $status)
     {
+        // Lưu lại referer (trang trước đó) để biết người dùng đến từ đâu
+        $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/admin/orders';
+        
         $order = $this->orderModel->getOrderById($id);
         
         if (!$order) {
@@ -106,14 +108,24 @@ class OrderController extends BaseController
         $validStatuses = ['pending', 'processing', 'shipping', 'completed', 'cancelled'];
         if (!in_array($status, $validStatuses)) {
             $_SESSION['error'] = "Trạng thái không hợp lệ!";
-            header('Location: /admin/orders/view/' . $id);
+            // Kiểm tra nếu đến từ trang chi tiết thì quay lại trang chi tiết
+            if (strpos($referer, '/admin/orders/viewOrder/') !== false) {
+                header('Location: /admin/orders/viewOrder/' . $id);
+            } else {
+                header('Location: /admin/orders');
+            }
             exit;
         }
         
         // Không cho phép cập nhật lại trạng thái đã hủy hoặc hoàn thành
         if ($order->status == 'cancelled' || $order->status == 'completed') {
             $_SESSION['error'] = "Không thể thay đổi trạng thái của đơn hàng đã " . ($order->status == 'cancelled' ? 'hủy' : 'hoàn thành') . "!";
-            header('Location: /admin/orders/view/' . $id);
+            // Kiểm tra nếu đến từ trang chi tiết thì quay lại trang chi tiết
+            if (strpos($referer, '/admin/orders/viewOrder/') !== false) {
+                header('Location: /admin/orders/viewOrder/' . $id);
+            } else {
+                header('Location: /admin/orders');
+            }
             exit;
         }
         
@@ -147,12 +159,17 @@ class OrderController extends BaseController
             $_SESSION['error'] = "Có lỗi xảy ra, vui lòng thử lại!";
         }
         
-        header('Location: /admin/orders/view/' . $id);
+        // Chuyển hướng về trang đã thực hiện hành động
+        if (strpos($referer, '/admin/orders/viewOrder/') !== false) {
+            header('Location: /admin/orders/viewOrder/' . $id);
+        } else {
+            header('Location: /admin/orders');
+        }
         exit;
     }
     
     // In đơn hàng
-    public function print($id)
+    public function printOrder($id)
     {
         $order = $this->orderModel->getOrderById($id);
         
@@ -168,7 +185,7 @@ class OrderController extends BaseController
         // Lấy thông tin người dùng
         $user = null;
         if (!empty($order->user_id)) {
-            $user = $this->userModel->getUserById($order->user_id);
+            $user = $this->accountModel->getAccountById($order->user_id);
         }
         
         // Hiển thị view
@@ -206,7 +223,7 @@ class OrderController extends BaseController
     }
     
     // Kiểm tra quyền Admin
-    private function isAdmin()
+    protected function isAdmin()
     {
         return isset($_SESSION['user_id']) && isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
     }

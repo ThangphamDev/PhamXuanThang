@@ -40,6 +40,22 @@
                                     <i class="fas fa-shopping-cart"></i> Giỏ hàng của tôi
                                 </a>
                             </li>
+                            <?php if ($account->role === 'admin'): ?>
+                            <li class="list-group-item">
+                                <a href="/admin/orders">
+                                    <i class="fas fa-clipboard-check"></i> Quản lý đơn hàng
+                                    <?php 
+                                    // Check for pending orders
+                                    require_once('app/models/OrderModel.php');
+                                    $orderModel = new OrderModel();
+                                    $pendingCount = $orderModel->countOrdersByStatus('pending');
+                                    if ($pendingCount > 0):
+                                    ?>
+                                    <span class="badge badge-warning float-right"><?php echo $pendingCount; ?></span>
+                                    <?php endif; ?>
+                                </a>
+                            </li>
+                            <?php endif; ?>
                             <li class="list-group-item">
                                 <a href="/account/logout" class="text-danger">
                                     <i class="fas fa-sign-out-alt"></i> Đăng xuất
@@ -151,6 +167,58 @@
                     </div>
                 </div>
             </div>
+            
+            <?php if ($account->role === 'admin' && isset($pendingOrders) && !empty($pendingOrders)): ?>
+            <div class="card mt-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock mr-2"></i>
+                        Đơn hàng chờ phê duyệt (<?php echo count($pendingOrders); ?>)
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Mã</th>
+                                    <th>Khách hàng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($pendingOrders as $order): ?>
+                                <tr>
+                                    <td>#<?php echo $order->id; ?></td>
+                                    <td>
+                                        <?php echo htmlspecialchars($order->name); ?><br>
+                                        <small class="text-muted"><?php echo htmlspecialchars($order->phone); ?></small>
+                                    </td>
+                                    <td><?php echo number_format($order->total_amount, 0, ',', '.'); ?>₫</td>
+                                    <td><?php echo date('d/m/Y H:i', strtotime($order->created_at)); ?></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="/admin/orders/updateStatus/<?php echo $order->id; ?>/processing" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i> Duyệt
+                                            </a>
+                                            <a href="/admin/orders/viewOrder/<?php echo $order->id; ?>" class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i> Xem
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="/admin/orders?status=pending" class="btn btn-sm btn-outline-primary">Xem tất cả đơn hàng chờ duyệt</a>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

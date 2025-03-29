@@ -75,7 +75,7 @@
                             </div>
                         <?php endif; ?>
                         
-                        <a href="/admin/orders/print/<?php echo $order->id; ?>" target="_blank" class="btn btn-default">
+                        <a href="/admin/orders/printOrder/<?php echo $order->id; ?>" target="_blank" class="btn btn-default">
                             <i class="fas fa-print"></i> In đơn hàng
                         </a>
                     </div>
@@ -263,7 +263,9 @@
                             <?php if (!empty($user)): ?>
                             <hr>
                             <p><strong><i class="fas fa-user-circle mr-1"></i> Tài khoản:</strong> <?php echo htmlspecialchars($user->username); ?></p>
+                            <?php if (isset($user->email)): ?>
                             <p><strong><i class="fas fa-envelope mr-1"></i> Email:</strong> <?php echo htmlspecialchars($user->email); ?></p>
+                            <?php endif; ?>
                             <a href="/admin/users/edit/<?php echo $user->id; ?>" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-user-edit"></i> Xem thông tin tài khoản
                             </a>

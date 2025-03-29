@@ -35,6 +35,87 @@
                 </div>
             <?php endif; ?>
             
+            <!-- Quick Approval Section for Pending Orders -->
+            <?php if (isset($counts['pending']) && $counts['pending'] > 0): ?>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-warning">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-exclamation-circle mr-2"></i> Đơn hàng chờ phê duyệt (<?php echo $counts['pending']; ?>)</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px">ID</th>
+                                        <th>Khách hàng</th>
+                                        <th>Giá trị đơn hàng</th>
+                                        <th>Phương thức thanh toán</th>
+                                        <th>Ngày đặt</th>
+                                        <th style="width: 220px">Thao tác nhanh</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php 
+                                    $pendingOrders = array_filter($orders, function($order) {
+                                        return $order->status === 'pending';
+                                    });
+                                    
+                                    foreach ($pendingOrders as $order): 
+                                    ?>
+                                    <tr>
+                                        <td><?php echo $order->id; ?></td>
+                                        <td>
+                                            <?php echo htmlspecialchars($order->name); ?><br>
+                                            <small><?php echo htmlspecialchars($order->phone); ?></small>
+                                        </td>
+                                        <td><strong><?php echo number_format($order->total_amount, 0, ',', '.'); ?>₫</strong></td>
+                                        <td>
+                                            <?php 
+                                            $payment_label = '';
+                                            switch ($order->payment_method) {
+                                                case 'cod':
+                                                    $payment_label = '<span class="badge badge-warning">COD</span>';
+                                                    break;
+                                                case 'bank_transfer':
+                                                    $payment_label = '<span class="badge badge-info">Chuyển khoản</span>';
+                                                    break;
+                                                default:
+                                                    $payment_label = '<span class="badge badge-secondary">' . $order->payment_method . '</span>';
+                                            }
+                                            echo $payment_label;
+                                            ?>
+                                        </td>
+                                        <td><?php echo date('d/m/Y H:i', strtotime($order->created_at)); ?></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="/admin/orders/updateStatus/<?php echo $order->id; ?>/processing" class="btn btn-sm btn-success mr-1">
+                                                    <i class="fas fa-check mr-1"></i> Phê duyệt
+                                                </a>
+                                                <a href="/admin/orders/viewOrder/<?php echo $order->id; ?>" class="btn btn-sm btn-info mr-1">
+                                                    <i class="fas fa-eye"></i> Chi tiết
+                                                </a>
+                                                <a href="/admin/orders/updateStatus/<?php echo $order->id; ?>/cancelled" class="btn btn-sm btn-danger" 
+                                                   onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">
+                                                    <i class="fas fa-times"></i> Hủy
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
@@ -157,7 +238,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="btn-group">
-                                                        <a href="/admin/orders/view/<?php echo $order->id; ?>" class="btn btn-sm btn-info">
+                                                        <a href="/admin/orders/viewOrder/<?php echo $order->id; ?>" class="btn btn-sm btn-info">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
                                                         <?php if ($order->status != 'cancelled' && $order->status != 'completed'): ?>

@@ -128,6 +128,15 @@ class AccountController extends Controller {
             exit();
         }
         
+        // If the user is an admin, load pending orders for quick approval
+        $pendingOrders = null;
+        if ($account->role === 'admin') {
+            require_once('app/models/OrderModel.php');
+            $orderModel = new OrderModel($this->db);
+            // Get the 5 most recent pending orders
+            $pendingOrders = $orderModel->getPendingOrders(5);
+        }
+        
         include_once 'app/views/account/profile.php';
     }
     

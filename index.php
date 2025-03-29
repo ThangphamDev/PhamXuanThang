@@ -11,29 +11,37 @@ $url = explode('/', $url);
 
 // Kiểm tra phần đầu tiên của URL để xác định controller 
 $controllerName = isset($url[0]) && $url[0] != '' ? ucfirst($url[0]) . 'Controller' : 'ProductController'; 
+$controllerPath = 'app/controllers/' . $controllerName . '.php';
 
-// Kiểm tra phần thứ hai của URL để xác định action 
-$action = isset($url[1]) && $url[1] != '' ? $url[1] : 'index'; 
-
-// die ("controller=$controllerName - action=$action"); 
+// Check for admin namespace
+if (isset($url[0]) && $url[0] == 'admin' && isset($url[1])) {
+    $controllerName = ucfirst($url[1]) . 'Controller';
+    $controllerPath = 'app/controllers/admin/' . $controllerName . '.php';
+    $action = isset($url[2]) && $url[2] != '' ? $url[2] : 'index';
+    $paramOffset = 3; // Offset for parameters in admin routes
+} else {
+    $action = isset($url[1]) && $url[1] != '' ? $url[1] : 'index';
+    $paramOffset = 2; // Offset for parameters in regular routes
+}
 
 // Kiểm tra xem controller và action có tồn tại không 
-if (!file_exists('app/controllers/' . $controllerName . '.php')) { 
+if (!file_exists($controllerPath)) { 
     // Xử lý không tìm thấy controller 
-    die('Controller not found'); 
+    die('Controller not found: ' . $controllerPath); 
 } 
 
-require_once 'app/controllers/' . $controllerName . '.php'; 
+require_once $controllerPath; 
 
+// Không cần ghi đè tên controller cho admin namespace nữa
 $controller = new $controllerName(); 
 
 if (!method_exists($controller, $action)) { 
     // Xử lý không tìm thấy action 
-    die('Action not found'); 
+    die('Action not found: ' . $action); 
 } 
 
 // Gọi action với các tham số còn lại (nếu có) 
-call_user_func_array([$controller, $action], array_slice($url, 2));
+call_user_func_array([$controller, $action], array_slice($url, $paramOffset));
 
 // Xử lý các request AJAX
 if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {

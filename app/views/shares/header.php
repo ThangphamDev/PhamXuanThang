@@ -773,7 +773,7 @@
                                     <a class="dropdown-item" href="/account/profile">
                                         <i class="fas fa-id-card"></i> Hồ sơ cá nhân
                                     </a>
-                                    <a class="dropdown-item" href="/account/orders">
+                                    <a class="dropdown-item" href="/Product/myOrders">
                                         <i class="fas fa-clipboard-list"></i> Đơn hàng của tôi
                                     </a>
                                     <div class="dropdown-divider"></div>
